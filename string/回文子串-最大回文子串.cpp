@@ -1,4 +1,5 @@
-//最大回文子串：利用扩展
+// Leetcode 005 Longest Palindromic Substring
+// 最大回文子串：利用扩展
 
 class Solution {
 public:
