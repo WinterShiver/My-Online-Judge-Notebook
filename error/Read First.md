@@ -1,6 +1,9 @@
 ## 边界条件
 
 关于边界条件第一开始就写好，或者在提交之前把所有的边界条件都试一遍然后打补丁，不要漠视。一些琐碎的题目要求也属此类，不要忽视。
+```diff
+- 边界条件相当重要！一定要一开始想着写好！
+```
 
 ## 数据范围
 
@@ -14,3 +17,9 @@
 
 * 动态规划（May 02 Leetcode 010 Regular Expression Matching）
 * （实际遇到）数据规模很大但取值范围很小，则针对每个可能取值保存信息（May 01 Leetcode 739）
+
+
+```diff
++ this will be highlighted in green
+- this will be highlighted in red
+```
