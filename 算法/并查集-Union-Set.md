@@ -24,7 +24,7 @@ A partition like "ababcbacadefegde", "hijhklij" is incorrect, because it splits 
 1.  `S`  will have length in range  `[1, 500]`.
 2.  `S`  will consist of lowercase letters (`'a'`  to  `'z'`) only.
 
-**解题思路：**按照字符划分集合。对每个字符，确定头尾字符圈定的范围，范围内的字符都能追溯到相同的祖宗。
+**解题思路：** 按照字符划分集合。对每个字符，确定头尾字符圈定的范围，范围内的字符都能追溯到相同的祖宗。
 
 ```cpp
 class Solution {
