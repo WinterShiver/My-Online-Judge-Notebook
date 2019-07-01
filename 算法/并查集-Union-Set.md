@@ -52,6 +52,91 @@ No way
 
 敌人关系：可以直接存储（计算了一下，这道题的空间卡的不大，存储敌人关系并不麻烦。如果空间卡的严or太稀疏，就不按二维数组存储，而是直接存储输入。）
 
+### 代码
+```cpp
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <stack>
+#include <queue>
+#include <vector>
+#include <cmath>
+#include <cstdio>
+#include <bitset>
+using namespace std;
+
+const int N = 103;
+
+static int father[N];
+static int ancester[N];
+static bool foul[N][N];
+
+int def_ancester(int i){
+    // 确定并赋值ans
+    int ans = i;
+    while(father[ans] != -1)
+        ans = father[ans];
+    ancester[i] = ans;
+    return ans;
+}
+
+void def_father(int i, int j){
+    // 确定并查集的关系，有赋值副作用
+    int ans_i = def_ancester(i);
+    int ans_j = def_ancester(j);
+    if(ans_i != ans_j)
+        father[ans_i] = ans_j;
+}
+
+int main(){
+    int n, m, k; 
+    cin >> n >> m >> k;
+    for(int i=0; i<=n; i++)
+        father[i] = -1;
+    for(int i=0; i<N; i++)
+        for(int j=0; j<N; j++)
+            foul[i][j] = false;
+    // new father
+    int aa, bb, judge;
+    // printf("Begin cin m ge\n");
+    for(int i=0; i<m; i++){
+        // printf("i = %d, m = %d", i, m);
+        cin >> aa >> bb >> judge;
+        aa--; bb--;
+        if(judge == 1)
+            def_father(aa, bb);
+        else
+            foul[aa][bb] = foul[bb][aa] = true;
+    }
+    // new ancester
+    for(int i=0; i<n; i++){
+        def_ancester(i);
+    }
+    // relation judge
+    // printf("Begin cin k ge\n");
+    for(int i=0; i<k; i++){
+        // printf("i = %d, k = %d", i, k);
+        cin >> aa >> bb;
+        aa--; bb--;
+        if(ancester[aa] == ancester[bb]){
+            if(foul[aa][bb])
+                printf("OK but...");
+            else
+                printf("No problem");
+        }
+        else{
+            if(foul[aa][bb])
+                printf("No way");
+            else
+                printf("OK");
+        }
+        if(i < k-1) printf("\n");
+    }
+    return 0;
+}
+```
+
 ## 练习2
 
 
