@@ -2,6 +2,7 @@
 
 * 功能：用来合并集合
 * 算法：首先确定每一个元素的父亲：如果觉得两者属于同一个集合，就让其中一者**祖宗**的父亲为另一者的**祖宗**。然后通过父亲找祖宗，两者肯定能找到相同的祖宗。注意一定要做这个找祖宗的工作，否则不能保证并查集的有效，或者导致嵌套。
+* 别忘了给father赋初始值-1
 
 ## 练习1
 
@@ -318,6 +319,128 @@ int main(){
 ```
 
 ## 练习3
+
+L3-003  社交集群  (30  分)
+
+当你在社交网络平台注册时，一般总是被要求填写你的个人兴趣爱好，以便找到具有相同兴趣爱好的潜在的朋友。一个“社交集群”是指部分兴趣爱好相同的人的集合。你需要找出所有的社交集群。
+
+### 输入格式：
+
+输入在第一行给出一个正整数 N（≤1000），为社交网络平台注册的所有用户的人数。于是这些人从 1 到 N 编号。随后 N 行，每行按以下格式给出一个人的兴趣爱好列表：
+
+K​i​​:  h​i​​[1]  h​i​​[2]  ...  h​i​​[K​i​​]
+
+其中K​i​​(>0)是兴趣爱好的个数，h​i​​[j]是第j个兴趣爱好的编号，为区间 [1, 1000] 内的整数。
+
+### 输出格式：
+
+首先在一行中输出不同的社交集群的个数。随后第二行按非增序输出每个集群中的人数。数字间以一个空格分隔，行末不得有多余空格。
+
+### 输入样例：
+
+```
+8
+3: 2 7 10
+1: 4
+2: 5 3
+1: 4
+1: 3
+1: 4
+4: 6 8 1 5
+1: 4
+
+```
+
+### 输出样例：
+
+```
+3
+4 3 1
+```
+
+### 解题思路：
+这道题的关键是如何对关系编码，因为并查集需要的“人和人之间具有关系，且具有传递性”中，关系没有直接表示，而是以共处一类表示。
+
+解决：对于每个关系设立了一个**代表元**，避免暴力检查人和人之间的关系造成的高复杂度（平方，甚至立方）。结果居然过了
+
+### 代码
+```cpp
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <stack>
+#include <queue>
+#include <vector>
+#include <cmath>
+#include <cstdio>
+#include <bitset>
+using namespace std;
+
+const int N = 1003;
+
+static int father[N];
+static int ancester[N];
+static int repre[N];
+
+int def_ancester(int i){
+    // 确定并赋值ans
+    int ans = i;
+    while(father[ans] != -1)
+        ans = father[ans];
+    ancester[i] = ans;
+    return ans;
+}
+
+void def_father(int i, int j){
+    // 确定并查集的关系，有赋值副作用
+    int ans_i = def_ancester(i);
+    int ans_j = def_ancester(j);
+    if(ans_i != ans_j)
+        father[ans_i] = ans_j;
+}
+
+int main(){
+    for(int i=0; i<N; i++){
+        father[i] = repre[i] = -1;
+    }
+    int n; cin >> n;
+    for(int i=0; i<n; i++){
+        int k; cin >> k;
+        cin.get();
+        for(int j=0; j<k; j++){
+            int index; cin >> index;
+            if(repre[index] == -1) repre[index] = i;
+            else def_father(repre[index], i);
+        }
+    }
+    for(int i=0; i<n; i++){
+        def_ancester(i);
+    }
+    // 利用之前的代表元数组计一下数
+    for(int i=0; i<n; i++){
+        repre[i] = 0;
+    }
+    for(int i=0; i<n; i++){
+        repre[ancester[i]] ++;
+    }
+    vector<int> v1;
+    for(int i=0; i<n; i++){
+        if(repre[i])
+            v1.push_back(repre[i]);
+    }
+    sort(v1.begin(), v1.end());
+    reverse(v1.begin(), v1.end());
+    printf("%d\n", (int)v1.size());
+    for(int i=0; i<v1.size(); i++){
+        printf("%d", v1[i]);
+        if(i != v1.size()-1) printf(" ");
+    }
+    return 0;
+}
+```
+
+## 练习4
 
 763.  Partition Labels
 
