@@ -52,6 +52,185 @@ No way
 
 敌人关系：可以直接存储（计算了一下，这道题的空间卡的不大，存储敌人关系并不麻烦。如果空间卡的严or太稀疏，就不按二维数组存储，而是直接存储输入。）
 
+## 练习2
+
+
+L2-007  家庭房产  (25  分)
+
+给定每个人的家庭成员和其自己名下的房产，请你统计出每个家庭的人口数、人均房产面积及房产套数。
+
+### 输入格式：
+
+输入第一行给出一个正整数N（≤1000），随后N行，每行按下列格式给出一个人的房产：
+
+```
+编号 父 母 k 孩子1 ... 孩子k 房产套数 总面积
+
+```
+
+其中`编号`是每个人独有的一个4位数的编号；`父`和`母`分别是该编号对应的这个人的父母的编号（如果已经过世，则显示`-1`）；`k`（0≤`k`≤5）是该人的子女的个数；`孩子i`是其子女的编号。
+
+### 输出格式：
+
+首先在第一行输出家庭个数（所有有亲属关系的人都属于同一个家庭）。随后按下列格式输出每个家庭的信息：
+
+```
+家庭成员的最小编号 家庭人口数 人均房产套数 人均房产面积
+
+```
+
+其中人均值要求保留小数点后3位。家庭信息首先按人均面积降序输出，若有并列，则按成员编号的升序输出。
+
+### 输入样例：
+
+```
+10
+6666 5551 5552 1 7777 1 100
+1234 5678 9012 1 0002 2 300
+8888 -1 -1 0 1 1000
+2468 0001 0004 1 2222 1 500
+7777 6666 -1 0 2 300
+3721 -1 -1 1 2333 2 150
+9012 -1 -1 3 1236 1235 1234 1 100
+1235 5678 9012 0 1 50
+2222 1236 2468 2 6661 6662 1 300
+2333 -1 3721 3 6661 6662 6663 1 100
+
+```
+
+### 输出样例：
+
+```
+3
+8888 1 1.000 1000.000
+0001 15 0.600 100.000
+5551 4 0.750 100.000
+```
+### 解题思路
+
+因为祖宗有父母两种，而且男女可能以任意的组合形成父母，所以直接找祖宗不方便。使用并查集，单纯把父母儿女当成亲属关系建立并查集，从而确定亲属关系。
+
+### 代码
+```cpp
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <stack>
+#include <queue>
+#include <vector>
+#include <cmath>
+#include <cstdio>
+#include <bitset>
+using namespace std;
+
+const int N = 10003;
+
+static int num[N];
+static double area[N];
+static int father[N];
+static int ancester[N];
+static int family_num[N];
+static bool isUsed[N];
+static bool isUsed_family[N];
+
+class Family{
+public:
+    int least_num;
+    int num;
+    int p_num;
+    double area;
+    Family(){
+        least_num = N;
+        p_num = num = area = 0;
+    }
+};
+
+bool cmp(Family f1, Family f2){
+    if(f1.area / f1.p_num > f2.area / f2.p_num) return true;
+    else if(f1.area / f1.p_num < f2.area / f2.p_num) return false;
+    else{
+        return f1.least_num < f2.least_num;
+    }
+}
+
+static Family fam[N];
+
+int def_ancester(int i){
+    // 确定并赋值ans
+    int ans = i;
+    while(father[ans] != -1)
+        ans = father[ans];
+    ancester[i] = ans;
+    return ans;
+}
+
+void def_father(int i, int j){
+    // 确定并查集的关系，有赋值副作用
+    int ans_i = def_ancester(i);
+    int ans_j = def_ancester(j);
+    if(ans_i != ans_j)
+        father[ans_i] = ans_j;
+}
+
+int main(){
+    int n; cin >> n;
+    for(int i=0; i<N; i++){
+        num[i] = area[i] = 0;
+        father[i] = -1;
+        isUsed[i] = isUsed_family[i] = false;
+    }
+    for(int i=0; i<n; i++){
+        int index, f, m, k;
+        cin >> index >> f >> m;
+        isUsed[index] = true;
+        if(f != -1){
+            def_father(index, f);
+            isUsed[f] = true;
+        }
+        // cout << "ok here" << endl;
+        if(m != -1){
+            def_father(index, m);
+            isUsed[m] = true;
+        }
+        // cout << "ok here" << endl;
+        cin >> k;
+        for(int j=0; j<k; j++){
+            int child; cin >> child;
+            def_father(index, child);
+            isUsed[child] = true;
+        }
+        cin >> num[index] >> area[index];
+    }
+    for(int i=0; i<N; i++){
+        if(isUsed[i])
+            def_ancester(i);
+    }
+    for(int i=0; i<N; i++){
+        if(isUsed[i]){
+            int index_f = ancester[i];
+            isUsed_family[index_f] = true;
+            fam[index_f].num += num[i];
+            fam[index_f].area += area[i];
+            fam[index_f].p_num ++;
+            if(fam[index_f].least_num > i)
+                fam[index_f].least_num = i;
+        }
+    }
+    vector<Family> v1;
+    for(int i=0; i<N; i++){
+        if(isUsed_family[i])
+            v1.push_back(fam[i]);
+    }
+    sort(v1.begin(), v1.end(), cmp);
+    printf("%d\n", (int)v1.size());
+    for(int i=0; i<v1.size(); i++){
+        printf("%04d %d %0.3f %0.3f", v1[i].least_num, v1[i].p_num, (double)v1[i].num / v1[i].p_num, v1[i].area / v1[i].p_num);
+        if(i != v1.size()-1) printf("\n");
+    }
+    return 0;
+}
+```
 
 ## 练习3
 
