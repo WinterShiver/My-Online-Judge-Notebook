@@ -1,6 +1,6 @@
 # 并查集 Union Set
 
-* 功能：用来合并集合
+* 功能：用来合并集合，处理**连通域**问题，和**传递性关系**问题，最适合使用并查集。
 * 算法：首先确定每一个元素的父亲：如果觉得两者属于同一个集合，就让其中一者**祖宗**的父亲为另一者的**祖宗**。然后通过父亲找祖宗，两者肯定能找到相同的祖宗。注意一定要做这个找祖宗的工作，否则不能保证并查集的有效，或者导致嵌套。
 * 别忘了给father赋初始值-1
 
@@ -441,6 +441,170 @@ int main(){
 ```
 
 ## 练习4
+
+L2-013  红色警报  (25  分)
+
+战争中保持各个城市间的连通性非常重要。本题要求你编写一个报警程序，当失去一个城市导致国家被分裂为多个无法连通的区域时，就发出红色警报。注意：若该国本来就不完全连通，是分裂的k个区域，而失去一个城市并不改变其他城市之间的连通性，则不要发出警报。
+
+### 输入格式：
+
+输入在第一行给出两个整数`N`（0  <  `N`  ≤  500）和`M`（≤  5000），分别为城市个数（于是默认城市从0到`N`-1编号）和连接两城市的通路条数。随后`M`行，每行给出一条通路所连接的两个城市的编号，其间以1个空格分隔。在城市信息之后给出被攻占的信息，即一个正整数`K`和随后的`K`个被攻占的城市的编号。
+
+注意：输入保证给出的被攻占的城市编号都是合法的且无重复，但并不保证给出的通路没有重复。
+
+### 输出格式：
+
+对每个被攻占的城市，如果它会改变整个国家的连通性，则输出`Red Alert: City k is lost!`，其中`k`是该城市的编号；否则只输出`City k is lost.`即可。如果该国失去了最后一个城市，则增加一行输出`Game Over.`。
+
+### 输入样例：
+
+```
+5 4
+0 1
+1 3
+3 0
+0 4
+5
+1 2 0 4 3
+
+```
+
+### 输出样例：
+
+```
+City 1 is lost.
+City 2 is lost.
+Red Alert: City 0 is lost!
+City 4 is lost.
+City 3 is lost.
+Game Over.
+```
+### 输入样例：
+
+```
+5 4
+0 1
+1 3
+3 0
+0 4
+5
+1 2 0 4 3
+
+```
+
+### 输出样例：
+
+```
+City 1 is lost.
+City 2 is lost.
+Red Alert: City 0 is lost!
+City 4 is lost.
+City 3 is lost.
+Game Over.
+```
+
+### 解题思路：
+这是一道很明显的连通域问题，就用并查集，在每一次丢失城市的时候更新连通域的个数。注意已经连通域下降可能是孤立的城市丢失or what，所以判断标准应该是“只算没有丢失的节点，连通域个数有没有上升”。
+
+### 代码：
+```cpp
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <stack>
+#include <queue>
+#include <vector>
+#include <cmath>
+#include <cstdio>
+#include <bitset>
+using namespace std;
+
+const int N = 503;
+const int M = 5003;
+
+static bool isAbandoned[N];
+static int father[N];
+static int ancester[N];
+static int i1[M], i2[M];
+static int n, m;
+
+void renew_father(int n){
+    for(int i=0; i<n; i++) 
+        father[i] = -1;
+}
+
+int def_ancester(int i){
+    // 确定并赋值ans
+    int ans = i;
+    while(father[ans] != -1)
+        ans = father[ans];
+    ancester[i] = ans;
+    return ans;
+}
+
+void def_father(int i, int j){
+    // 确定并查集的关系，有赋值副作用
+    int ans_i = def_ancester(i);
+    int ans_j = def_ancester(j);
+    if(ans_i != ans_j)
+        father[ans_i] = ans_j;
+}
+
+int check_groups(int n){
+    // n: people number
+    // given ancester[], return how many linked areas
+    int result = 0;
+    for(int i=0; i<n; i++){
+        if(ancester[i] == i && !isAbandoned[i]) 
+            result ++;
+    }
+    return result;
+}
+
+int mainloop(){
+    renew_father(n);
+    for(int i=0; i<m; i++){
+        // 防止给出一条假的路。但其实没用，因为如果是假的路，def_father没有任何效果。
+        if(i1[i] == i2[i]) continue;
+        // 确定关系
+        if(!isAbandoned[i1[i]] && !isAbandoned[i2[i]])
+            def_father(i1[i], i2[i]);
+    }
+    for(int i=0; i<n; i++)
+        def_ancester(i);
+    return check_groups(n);
+}
+
+int main(){
+    for(int i=0; i<N; i++){
+        father[i] = -1;
+    }
+    cin >> n >> m;
+    for(int i=0; i<m; i++){
+        cin >> i1[i] >> i2[i];
+    }
+    int g_s = mainloop();
+    int k; cin >> k;
+    bool flag;
+    // printf("%d\n", g_s);
+    for(int i=0; i<k; i++){
+        int index; cin >> index;
+        isAbandoned[index] = true;
+        int t_s = mainloop();
+        flag = t_s > g_s;
+        g_s = t_s;
+        // printf("%d\n", g_s);
+        if(flag) printf("Red Alert: City %d is lost!", index);
+        else printf("City %d is lost.", index);
+        if(i != k-1) printf("\n");
+    }
+    if(k == n) printf("\nGame Over.");
+    return 0;
+}
+```
+
+## 练习5
 
 763.  Partition Labels
 
