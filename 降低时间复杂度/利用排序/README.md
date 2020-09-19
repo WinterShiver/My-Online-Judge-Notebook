@@ -11,3 +11,6 @@
 * L2-005：不太典型的O(mn^2)变O(mnlogn)
 * L3-021：比较难的此类问题，O(n^3)变O(n^2logn)
 
+## 技巧
+
+桶排序的O(n)在某些时候很好用。例如LeetCode 164 https://leetcode-cn.com/problems/maximum-gap/
