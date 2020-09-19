@@ -12,4 +12,4 @@ DP思路：以当前位置为**终点**的最长串长度，则只在右括号�
 
 # 其他题目
 
-LeetCode 176：很简单的DP，只是有点麻烦而已。此题目可以滚动数组。
+LeetCode 174：很简单的DP，只是有点麻烦而已。此题目可以滚动数组。https://leetcode-cn.com/problems/dungeon-game/
